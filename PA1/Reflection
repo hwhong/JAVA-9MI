@@ -1,0 +1,13 @@
+What I've learned from doing the project? 
+- This project was a level up from the previous assignments. I learned more about my logic of implementation and when to do
+what operation with the user's input (SimpleWar.java). I also learned about JUnit testing and how it will benefit me for
+years to come. 
+
+What were the obstacles that I've encountered while coding for this assignment? 
+- SimpleWar.java has caused me some trouble. I had some problem with knowing when a full stack is dealed, and therefore there
+were no cards in the stack. I had a bug with the floor function in the SimpleWar.java file, I mistakenly placed 3 as a 
+parameter which causes the program to only retrieve 3 kinds of suit when it really should generate 4 kinds of suits 
+LESSON LEARNED! 
+
+Note to future Warren (lol)
+- READ THE JAVADOC MORE CAREFULLT
