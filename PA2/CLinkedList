@@ -1,0 +1,514 @@
+import java.util.*;
+
+public class CLinkedList<E> extends AbstractList<E> {
+  
+  private int nelems;
+    // if needed
+  private static final int ZERO = 0;
+  
+  protected class Node {
+    E data;
+    Node next;
+    Node prev;
+    
+    /** Constructor to create singleton Node */
+    public Node(E element)
+    {
+    	this.data = element;
+    }
+    /**
+     * Constructor to create singleton link it between previous and next 
+     *   @param element Element to add, can be null
+     *   @param prevNode predecessor Node, can be null
+     *   @param nextNode successor Node, can be null 
+     */
+    public Node(E element, Node prevNode, Node nextNode)
+    {
+    	this.data = element; 
+    	this.next = nextNode;
+    	this.prev = prevNode;
+    }
+    /** Remove this node from the list. Update previous and next nodes */
+    public void remove()
+    {
+    	this.getPrev().setNext(next);
+    	this.getNext().setPrev(prev);
+    }
+    /** Set the previous node in the list
+     *  @param p new previous node
+     */
+    public void setPrev(Node p)
+    {
+    	this.prev = p;
+    }
+    /** Set the next node in the list
+     * @param n new next node
+     */
+    public void setNext(Node n)
+    {
+    	this.next = n;
+    }
+    
+    /** Set the element 
+    *  @param e new element 
+    */
+    public void setElement(E e)
+    {
+    	this.data = e;
+    }
+
+    /** Accessor to get the next Node in the list */
+    public Node getNext()
+    {
+      return this.next; 
+    }
+    /** Accessor to get the prev Node in the list */
+    public Node getPrev()
+    {
+      return this.prev; 
+    } 
+    /** Accessor to get the Nodes Element */
+    public E getElement()
+    {
+      return this.data;
+    } 
+  }
+  
+  /** ListIterator implementation */ 
+  protected class MyListIterator implements ListIterator<E> {
+	  
+    private boolean forward;
+    private boolean canRemove;
+    private Node left,right; // Cursor sits between these two nodes
+    private int idx = 0;     // Current position, what next() would return 
+    private int size = 0;
+
+    public MyListIterator()
+    {
+      this.left = head;
+      this.right = head.getNext();
+      this.idx = 0;
+      this.size = CLinkedList.this.size();
+      this.forward = true;
+      this.canRemove = false;
+    }
+    /**
+    * Adds an element to the list between 'left' and 'right'.
+    * 
+    * @param: the element e to insert 
+    * @throws: NullPointerException
+    */
+    @Override
+    public void add(E e) throws  NullPointerException
+    {
+    	if (e == null) { 
+    		throw new NullPointerException();
+    	}
+    	canRemove = false; 
+    	
+    	if (size == 0) {                           //if there are no nodes to start with, only dummy 
+    		Node newNode = new Node(e);
+    		left.setNext(newNode);
+    		right.setPrev(newNode);
+        	newNode.setNext(newNode);
+        	newNode.setPrev(newNode);
+    		right = newNode;
+    		nelems++;
+    	}
+    	
+    	if (idx == 0) {                            //if user wants to add to the first node
+    		Node newNode = new Node(e);
+    		left.setNext(newNode);
+    		newNode.setNext(right);
+    		right.setPrev(newNode);
+    		tail.getPrev().setNext(newNode);
+    		newNode.setPrev(tail.getPrev());
+    		left = newNode; 
+    		nelems++;
+    	}
+    	else if (idx == size-1) {                  //if user wants to add to the last node 
+    		Node newNode = new Node(e);
+    		newNode.setNext(head.getNext());
+    		tail.getPrev().setNext(newNode);
+    		newNode.setPrev(tail.getPrev());
+    		tail.setPrev(newNode);
+    		head.getNext().setPrev(newNode);
+    		right = newNode;
+    		left = newNode.getPrev();
+    		nelems++;
+    	}
+    	else {                                     //if user wants to add to the middle of the list 
+    		Node newNode = new Node(e);
+    		left.setNext(newNode);
+    		right.setPrev(newNode);
+    		
+    		newNode.setNext(right);
+    		newNode.setPrev(left);
+    		left = newNode; 
+    		nelems++;
+    	}
+    }
+    /**
+    * Checks if there is another element to be retrieved by calling 
+    * next().
+    * 
+    * Hint: how would this work for a circular list?
+    */
+    @Override
+    public boolean hasNext()
+    {
+    	if (size != 0) { 
+    		return true;
+    	}
+    	else { 
+    		return false;
+    	}
+    }
+    
+    @Override
+    public boolean hasPrevious()
+    {
+    	if (left.getElement() != null) {
+    		return true;
+    	}
+    	else { 
+    		return false; 
+    	}
+   
+    }
+    @Override
+    public E next() throws NoSuchElementException
+    {
+      left = right; 
+      right = right.getNext();
+      canRemove = true; 
+      forward = true; 
+      
+      E var = left.getElement(); 
+      if (var == null) { 
+    	  throw new NoSuchElementException();
+      }
+      else { 
+    	  idx++;
+    	  return var;
+      }
+    }
+    @Override
+    public int nextIndex()
+    {
+    	if (size == 0) { 
+    		return -1;
+    	}
+    	
+    	if (idx == size-1) { 
+    		return 0;
+    	}
+    	else {
+    		if (size == 0) { 
+    			return 0;
+    		}
+    		else { 
+    			return (idx+1) % this.size;
+    		}
+    	}
+    }
+    @Override
+    public E previous() throws NoSuchElementException
+    {
+    	right = left; 
+        left = left.getPrev();
+        canRemove = true;
+        forward = false; 
+        
+        E var = right.getElement(); 
+        if (var == null) { 
+      	  throw new NoSuchElementException();
+        }
+        else { 
+          idx--;
+      	  return var;
+        }
+    }
+    
+    @Override
+    public int previousIndex()
+    {
+    	if (size == 0) { 
+    		return -1;
+    	}
+    	
+    	if (idx == 0) { 
+    		
+    		return size-1; 
+    	}
+    	else { 
+    		if (size == 0) { 
+    			return 0;
+    		}
+    		else { 
+    			return (idx-1) % this.size;
+    		}
+    	}
+    }
+    
+    @Override
+    public void remove() throws IllegalStateException
+    {
+    	if (canRemove == false ) {                                              //neither next nor previous was called 
+    		throw new IllegalStateException();
+    	}
+    	
+    	if (forward == true) { 
+    		left.remove();                                                      //remove the element on the left 
+    		canRemove = false;
+    		size--;
+    		nelems--;
+    	}
+    	else  { 
+    	    right.remove();                                                     //remove the element on the right 
+    		canRemove = false;
+    		size--;
+    		nelems--;
+    	}
+    }
+    /**
+     * Replaces last element returned by next() or previous() with a
+     * given element.
+     */
+    @Override
+    public void set(E e) 
+      throws NullPointerException,IllegalStateException
+    {
+    	if (e == null) { 
+    		throw new NullPointerException();
+    	}
+    	if (canRemove == false) { 
+    		throw new IllegalStateException();
+    	}
+    	
+    	if (forward == true) {                                   //if next was called previously 
+    		left.setElement(e);  
+    	}
+    	else  {                                                  //if previous was called previously 
+    		right.setElement(e);
+    	}
+    }
+    
+  }
+  
+  
+  /** Only 0-argument constructor is defined */
+  public CLinkedList()
+  {
+    head = new Node(null, null, tail); 
+    tail = new Node(null, head, null);
+    head.setNext(tail);
+    nelems = 0;
+  }
+  @Override
+  public int size()
+  {
+	 return nelems;
+  }
+  
+  @Override
+  public E get(int index) throws IndexOutOfBoundsException
+  {
+	if(index > size() - 1 || index < 0)
+		throw new IndexOutOfBoundsException();
+	
+    Node node = this.getNth(index);
+    return node.getElement();
+  }
+  
+  @Override
+  /** Add an element to the list 
+    * @param index  where in the list to add
+    * @param data data to add
+    * @throws IndexOutOfBoundsException
+    * @throws NullPointerException
+    */ 
+    public void add(int index, E data) 
+    throws IndexOutOfBoundsException,NullPointerException
+  {
+	  if (data == null) { 
+		  throw new NullPointerException();
+	  }
+	  if (index < 0) {	  
+		  throw new IndexOutOfBoundsException();
+	  }
+	  if (index != 0 && index > this.size()) {	  
+		  throw new IndexOutOfBoundsException();
+	  }
+	  
+	  if (index == 0) { 
+		  if (this.size() == 0) {              //if its the very first node added (i.e head - node - tail)
+			  Node midNode = new Node(data);
+			  
+			  midNode.setNext(midNode);        //setting circular links for itself
+			  midNode.setPrev(midNode);
+			  
+			  head.setNext(midNode);           //setting links with the head and tail
+			  tail.setPrev(midNode);
+			  
+			  nelems++;
+		  }
+		  else {                               //replaces the current very first node, after the head dummy node
+			  Node temp = head.getNext();      
+			  Node node = new Node(data, tail.getPrev(), temp);     //setting one circular with the one before tail, and a one with beside
+			  temp.setPrev(node);                                   //setting the other one beside
+			  
+			  head.setNext(node);                                   //setting single link with head 
+			  tail.getPrev().setNext(node);                         //setting the other circular link
+			  
+			  nelems++;
+		  }
+	  }
+	  else if (index == this.size()) {      //if adding to become the very last one 
+		  Node lastNode = new Node(data);
+		  Node temp = tail.getPrev();
+		  
+		  temp.setNext(lastNode);             //setting the double links beside
+		  lastNode.setPrev(temp);
+		  
+		  tail.setPrev(lastNode);             //setting the link with the tail
+		  
+		  head.getNext().setPrev(lastNode);   //setting the circular links    
+		  lastNode.setNext(head.getNext());
+		  
+		  nelems++;
+	  }
+	  else { 
+		  Node node = this.getNth(index);      //getting node at index
+		  Node preNode = node.getPrev();       //getting the old previous node
+		  Node newNode = new Node(data);       //creating the new node to be added
+		  
+		  node.setPrev(newNode);               //setting the links on the right 
+		  newNode.setNext(node);
+		   
+		  preNode.setNext(newNode);            //setting the links on the left
+		  newNode.setPrev(preNode);	  
+		  
+		  nelems++;
+	  } 
+  }
+  
+  /** Set the element at an index in the list 
+    * @param index  where in the list to add
+    * @param data data to add
+    * @return element that was previously at this index.
+    * @throws IndexOutOfBoundsException
+    * @throws NullPointerException
+    */ 
+  public E set(int index, E data) 
+    throws IndexOutOfBoundsException,NullPointerException
+  {
+	  if (index > this.size()-1 || index < 0) {           //testing IndexOutOfBoundsException
+		  throw new IndexOutOfBoundsException();
+	  }
+	  
+	  if (data == null) {                                 //testing NullPointerException
+		  throw new NullPointerException();           
+	  }
+	  
+	  Node node = this.getNth(index);
+	  E tempVar = node.getElement();
+	  node.setElement(data);                              //setting the new data to the old node
+      return tempVar; 
+  }
+  
+  /** Remove the element at an index in the list 
+    * @param index  where in the list to remove
+    * @return element the data found
+    * @throws IndexOutOfBoundsException
+    */ 
+  public E remove(int index) throws IndexOutOfBoundsException
+  {	  
+	  if (size() == 1) { 
+		  E tempVar = head.getNext().getElement();
+		  this.clear();
+		  return tempVar;
+	  }
+	  else if (index < 0 || index > this.size()-1) {                        //testing IndexOutOfBoundsException
+		  throw new IndexOutOfBoundsException();
+	  }
+	  else {
+		  Node node = this.getNth(index);
+		  if (node == null) { 
+			  return null;
+		  }
+		  E tempVar = node.getElement();
+		  if (index == 0) { 
+			  head.setNext(node.getNext());
+			  node.remove();
+			  this.nelems--;
+			  return tempVar;
+		  }
+		  else if (index == this.size()-1) { 
+			  tail.setPrev(node.getPrev());
+			  node.remove();
+			  this.nelems--;
+			  return tempVar;
+		  }
+		  node.remove();
+		  this.nelems--;
+		  return tempVar;
+	  }
+  }
+  
+  /** Clear the linked list */
+  public void clear()
+  {
+	  this.head.setNext(tail);
+	  this.tail.setPrev(head);
+	  this.nelems = 0;
+  }
+  
+  /** Determine if the list empty 
+    *  @return true if empty, false otherwise */
+  public boolean isEmpty()
+  {
+	  if (this.size() == 0) { 
+		  return true;
+	  }
+	  else { 
+		  return false;
+	  }
+  }
+  
+  // Helper method to get the Node at the Nth index
+  private Node getNth(int index) 
+  {
+	  if (index == 0) {                  //if index is the first node after the head dummy 
+		  return this.head.getNext();
+	  }
+	  else if (index == this.size()-1){  //if index is the last node before the tail dummy
+		  return this.tail.getPrev();
+	  }
+	  else {                             //if the index is anywhere in between the head and tail dummy 
+	  Node current = this.head; 
+	  int count = -1;
+	  while (current.getNext() != this.tail) {       
+		  current = current.getNext();
+		  count++;
+		  if (index == count) {  
+			  return current;
+		  }
+	  }
+	  return current;
+	}
+  }
+  
+   public Iterator<E> iterator()
+   {
+    return new MyListIterator();
+   }
+   public ListIterator<E> listIterator()
+   {
+    return new MyListIterator();
+   }
+}
+
+// VIM: set the tabstop and shiftwidth to 4 
+// vim:tw=78:ts=4:et:sw=4
+
