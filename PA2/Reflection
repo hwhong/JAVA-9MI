@@ -1,0 +1,12 @@
+What I've learned from doing the project? 
+- This project was really challenging as it was lengthy and the bugs were hard to find. I learned much about the linkedList 
+data structure and how I could implementing a LinkedList that performs in a circular manner. The idea of creating an inner
+class was something that is quite new to me. I think it will be pretty useful in the future. 
+
+What were the obstacles that I've encountered while coding for this assignment? 
+- I think the most trouble I had was with setting the link between each node, and also thinking of all the edge cases that I 
+may encounter. I had a little bug with setting the link of head dummy node, turns out the bug was in the constructor all along.
+
+Note to future Warren (lol)
+- After knowing that the bug was in the constructor (a place where you never thought something could go wrong), you should be
+more careful when you debug, don't eliminate any "obvious choice" as the bug may just be in there. 
